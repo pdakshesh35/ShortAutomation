@@ -1,0 +1,21 @@
+name: short_automation
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - fastapi
+  - uvicorn
+  - httpx
+  - ffmpeg
+  - pip
+  - pip:
+      - newsapi-python
+      - python-dotenv
+      - openai
+      - pathlib
+      - runware
+      - numpy
+      - moviepy==1.0.3
+      - Pillow==9.5.0
+      - requests
+      - imageio-ffmpeg

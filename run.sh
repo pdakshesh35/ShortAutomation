@@ -1,0 +1,1 @@
+docker build -t ytshorts . && docker run -p 28080:28080 -v "$(pwd)/data":/app/data ytshorts
