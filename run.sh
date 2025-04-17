@@ -1,1 +1,1 @@
-docker build -t ytshorts . && docker run -p 28080:28080 -v "$(pwd)/data":/app/data ytshorts
+docker build -t short_automation . && docker run -p 28080:28080 -v "$(pwd)/data":/app/data short_automation
