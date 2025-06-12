@@ -1,7 +1,7 @@
 import json
 from typing import Dict
 from payload_parser import Payload
-from video_generator import VideoGenerator
+from core.video_generator import VideoGenerator
 import requests
 import os
 import tempfile

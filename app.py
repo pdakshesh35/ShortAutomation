@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from openai import OpenAI
 from runware import Runware, IImageInference
-from video_service import VideoService
+from core.video_service import VideoService
 from fastapi.responses import FileResponse
 
 # Load environment variables from .env file
