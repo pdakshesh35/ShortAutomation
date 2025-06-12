@@ -122,20 +122,22 @@ async def generate_news_script(request_id: str):
 
 Instruction for Image Prompts : "Imagine a visually dynamic scene filled with vibrant colors and fluid shapes that evoke emotion and energy without any textual elements. The image should display an abstract interplay of light, shadows, and organic forms that suggest movement and narrative depth, using visual cues like radiant gradients, swirling patterns, and symbolic silhouettes to tell a story purely through imagery, completely free of any words or lettering."
 
+Additionally provide simple director instructions for each scene. Use one of these camera effects: zoom_in, zoom_out, pan_left, pan_right, pan_up, pan_down or none. Include them under an "effect" key and optionally a numeric "duration" in seconds matching the narration for that scene. These instructions will be used by a script that turns images into video with basic pan and zoom.
+
 News Content : {news_content}
 Output Format:
 Return the final result in the following JSON structure:
 {{
-  "1": {{ "script": "Your Scene 1 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 1 here" }},
-  "2": {{ "script": "Your Scene 2 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 2 here" }},
-  "3": {{ "script": "Your Scene 3 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 3 here" }},
-  "4": {{ "script": "Your Scene 4 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 4 here" }},
-  "5": {{ "script": "Your Scene 5 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 5 here" }},
-  "6": {{ "script": "Your Scene 6 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 6 here" }},
-  "7": {{ "script": "Your Scene 7 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 7 here" }},
-  "8": {{ "script": "Your Scene 8 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 8 here" }},
-  "9": {{ "script": "Your Scene 9 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 9 here" }},
-  "10": {{ "script": "Your Scene 10 script here, including a strong call-to-action to subscribe for more content", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 10 here" }},
+  "1": {{ "script": "Your Scene 1 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 1 here", "effect": "pan_left", "duration": 3 }},
+  "2": {{ "script": "Your Scene 2 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 2 here", "effect": "zoom_in", "duration": 3 }},
+  "3": {{ "script": "Your Scene 3 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 3 here", "effect": "pan_up", "duration": 3 }},
+  "4": {{ "script": "Your Scene 4 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 4 here", "effect": "pan_right", "duration": 3 }},
+  "5": {{ "script": "Your Scene 5 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 5 here", "effect": "zoom_out", "duration": 3 }},
+  "6": {{ "script": "Your Scene 6 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 6 here", "effect": "none", "duration": 3 }},
+  "7": {{ "script": "Your Scene 7 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 7 here", "effect": "pan_down", "duration": 3 }},
+  "8": {{ "script": "Your Scene 8 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 8 here", "effect": "pan_left", "duration": 3 }},
+  "9": {{ "script": "Your Scene 9 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 9 here", "effect": "zoom_in", "duration": 3 }},
+  "10": {{ "script": "Your Scene 10 script here, including a strong call-to-action to subscribe for more content", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 10 here", "effect": "pan_right", "duration": 3 }},
   "metadata": {{ "title": "{news_title}", "description": "{news_description}" }}
 }}'''
     

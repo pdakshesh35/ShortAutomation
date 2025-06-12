@@ -16,6 +16,23 @@ class VideoGenerator:
         self.font_size = int(self.VIDEO_HEIGHT * 0.04)
         self.font = self._load_font()
 
+    def _apply_effect(self, clip: ImageClip, effect: str, duration: float) -> ImageClip:
+        """Apply a simple pan or zoom effect to the clip."""
+        speed = 50
+        if effect == "zoom_in":
+            return clip.resize(lambda t: 1 + 0.1 * t / duration)
+        if effect == "zoom_out":
+            return clip.resize(lambda t: 1 + 0.1 * (1 - t / duration))
+        if effect == "pan_left":
+            return clip.set_position(lambda t: (-speed * t, "center"))
+        if effect == "pan_right":
+            return clip.set_position(lambda t: (speed * t, "center"))
+        if effect == "pan_up":
+            return clip.set_position(lambda t: ("center", -speed * t))
+        if effect == "pan_down":
+            return clip.set_position(lambda t: ("center", speed * t))
+        return clip
+
     def _load_font(self):
         """Load a font, downloading Montserrat if necessary, with fallback to default."""
         temp_dir = tempfile.gettempdir()
@@ -135,6 +152,9 @@ class VideoGenerator:
             img = img.crop(x_center=img.w/2, width=self.VIDEO_WIDTH)
         else:
             img = img.resize(width=self.VIDEO_WIDTH)
+
+        effect = scene_data.get("effect", "none")
+        img = self._apply_effect(img, effect, duration)
 
         # Position subtitle in the third quarter (center of 50%-75% of screen height)
         subtitle_y = int(self.VIDEO_HEIGHT * 0.625)
