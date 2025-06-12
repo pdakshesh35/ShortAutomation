@@ -10,6 +10,7 @@ This project is a FastAPI-based application that automates the creation of engag
 - **Video Stitching**: Combines audio, images, and dynamic subtitles into a vertical video (1080x1920 or 1152x2048) using `moviepy` and `Pillow`.
 - **Dynamic Subtitles**: Adds word-highlighted subtitles in the third quarter of the screen, styled with Montserrat font for social media appeal.
 - **Streaming API**: Provides a Server-Sent Events (SSE) endpoint (`/stream`) to track pipeline progress in real-time.
+- **Image-to-Video Director**: Combines a list of images into a video using simple pan and zoom effects based on director-style instructions.
 - **Test Endpoint**: Generates a video from a sample JSON payload for testing (`/test-video`).
 
 ## Project Structure
@@ -18,6 +19,7 @@ This project is a FastAPI-based application that automates the creation of engag
 - **`video_generator.py`**: Core video generation logic, creating scenes with images, audio, and dynamic subtitles using `moviepy` and `Pillow`.
 - **`video_subtitle_generator.py`**: Alternative subtitle generator using speech recognition for word-level sync (not used in the main pipeline).
 - **`payload_parser.py`**: Parses JSON payloads into `Scene` and `Payload` objects for structured data handling.
+- **`image_to_video.py`**: Utility to create a video from a sequence of images with optional pan/zoom effects.
 - **`environment.yml`**: Conda environment configuration with dependencies (Python 3.10, FastAPI, OpenAI, etc.).
 - **`Dockerfile`**: Defines the Docker image setup using Miniconda, installing dependencies and running the FastAPI app.
 - **`run.sh`**: Script to build and run the Docker container, mapping port 28080 and mounting a data volume.
@@ -98,6 +100,17 @@ This project is a FastAPI-based application that automates the creation of engag
      curl -o test_video.mp4 http://localhost:28080/test-video
      ```
    - Output: Video saved to `data/test_video.mp4` and returned in the response.
+3. **Image-to-Video**:
+   - Create a video from local images using `ImageToVideoDirector`.
+   - Example:
+     ```python
+     from image_to_video import ImageToVideoDirector, SceneInstruction
+     scenes = [
+         SceneInstruction("img1.jpg", 2.0, "zoom_in"),
+         SceneInstruction("img2.jpg", 2.0, "pan_left")
+     ]
+     ImageToVideoDirector(1920, 1080).create_video(scenes, "output.mp4")
+     ```
 
 ### Pipeline Tasks
 The `/stream` endpoint executes the following tasks:
