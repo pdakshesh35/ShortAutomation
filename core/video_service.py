@@ -97,7 +97,9 @@ class VideoService:
             scene_dict[str(idx)] = {
                 "script": scene.script,
                 "imagePath": img_path,
-                "audioPath": audio_path
+                "audioPath": audio_path,
+                "effect": scene.effect,
+                "duration": scene.duration
             }
             logger.info(f"Scene {idx}: image={img_path}, audio={audio_path}, scene_id={scene.scene_id}")
 

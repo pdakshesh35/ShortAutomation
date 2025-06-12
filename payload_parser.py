@@ -3,12 +3,15 @@ from typing import Dict, List, Optional
 
 class Scene:
     def __init__(self, scene_id: str, script: str, image_prompt: str,
-                 audio_path: str, image_url: str):
+                 audio_path: str, image_url: str,
+                 effect: str = "none", duration: float = 3.0):
         self.scene_id = scene_id
         self.script = script
         self.image_prompt = image_prompt
         self.audio_path = audio_path
         self.image_url = image_url
+        self.effect = effect
+        self.duration = duration
 
     @classmethod
     def from_dict(cls, data: Dict) -> "Scene":
@@ -17,7 +20,9 @@ class Scene:
             script=data.get("script", ""),
             image_prompt=data.get("imagePrompt", ""),
             audio_path=data.get("audioPath", ""),
-            image_url=data.get("imageUrl", "")
+            image_url=data.get("imageUrl", ""),
+            effect=data.get("effect", "none"),
+            duration=float(data.get("duration", 3.0))
         )
 
     def to_dict(self) -> Dict:
@@ -26,7 +31,9 @@ class Scene:
             "script": self.script,
             "imagePrompt": self.image_prompt,
             "audioPath": self.audio_path,
-            "imageUrl": self.image_url
+            "imageUrl": self.image_url,
+            "effect": self.effect,
+            "duration": self.duration
         }
 
 class Payload:

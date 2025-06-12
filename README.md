@@ -4,7 +4,7 @@ This project is a FastAPI-based application that automates the creation of engag
 
 ## Features
 - **News Fetching**: Retrieves top headlines from NewsAPI based on country, category, or query.
-- **Script Generation**: Uses OpenAI GPT-4 to create a 2-minute script with 10 scenes, including an opening and a call-to-action to subscribe.
+- **Script Generation**: Uses OpenAI GPT-4 to create a 2-minute script with 10 scenes, including an opening and a call-to-action to subscribe. Each scene also returns simple director instructions (e.g., pan or zoom effects) for use with the image-to-video pipeline.
 - **Audio Generation**: Converts scripts to audio using OpenAI's TTS (text-to-speech) with the "nova" voice.
 - **Image Generation**: Creates vibrant, abstract images for each scene using Runware's image inference API.
 - **Video Stitching**: Combines audio, images, and dynamic subtitles into a vertical video (1080x1920 or 1152x2048) using `moviepy` and `Pillow`.
@@ -131,7 +131,8 @@ The `payload.json` file (generated in `task5_stitch_video`) has the following st
     "script": "Welcome to our daily news blast!",
     "imagePrompt": "Vibrant abstract scene with swirling colors...",
     "audioPath": "data/<request_id>/audio-1.mp3",
-    "imageUrl": "https://example.com/image1.jpg"
+    "imageUrl": "https://example.com/image1.jpg",
+    "effect": "zoom_in"
   },
   ...
   "10": {
@@ -139,7 +140,8 @@ The `payload.json` file (generated in `task5_stitch_video`) has the following st
     "script": "Subscribe for daily news updates!",
     "imagePrompt": "Dynamic scene with a subscribe button silhouette...",
     "audioPath": "data/<request_id>/audio-10.mp3",
-    "imageUrl": "https://example.com/image10.jpg"
+    "imageUrl": "https://example.com/image10.jpg",
+    "effect": "pan_right"
   },
   "metadata": {
     "title": "Tech News Update",
