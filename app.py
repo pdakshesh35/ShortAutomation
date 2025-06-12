@@ -240,13 +240,15 @@ async def generate_audio_file(request_id: str, text: str, scene_number: str) -> 
     file_path = os.path.join(f"data/{request_id}", f"audio-{scene_number}.mp3")
     
     try:
-        # Generate audio using OpenAI TTS
-        response = openai_client.audio.speech.create(
-            model="tts-1",
-            voice="nova",
-            input=text,
+        # Generate audio using OpenAI TTS in a background thread
+        response = await asyncio.to_thread(
+            lambda: openai_client.audio.speech.create(
+                model="tts-1",
+                voice="nova",
+                input=text,
+            )
         )
-        response.stream_to_file(file_path)
+        await asyncio.to_thread(response.stream_to_file, file_path)
     except Exception as e:
         raise e
     return file_path
@@ -376,7 +378,7 @@ async def stitch_video_from_scenes(request_id: str):
         json.dump(json.loads(latest_ai_response), file, indent=2)
     
     # Generate video
-    service.generate(filename, f"data/{request_id}/final_video.mp4")
+    await asyncio.to_thread(service.generate, filename, f"data/{request_id}/final_video.mp4")
     yield create_task_response(request_id, "5", "Success", f"Video generated: data/{request_id}/final_video.mp4")
 
 async def pipeline_tasks(country: str, category: str, query: str):
