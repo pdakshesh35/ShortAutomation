@@ -457,7 +457,7 @@ def test_video():
     """
     # Initialize VideoService with 1152x2048 resolution
     service = VideoService(width=1152, height=2048)
-    input_json = "data/f851c750-b4a6-45fa-b23d-5c268e738e95/payload.json"
+    input_json = "data/a47bf841-39e2-4556-b414-32c6ce0682d1/payload.json"
     os.makedirs("data", exist_ok=True)
     output_video = "data/test_video.mp4"
     

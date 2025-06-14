@@ -1,0 +1,86 @@
+{
+  "1": {
+    "script": "Hey there, ever thought about your internet search history going public? Now, that's a spine-chilling thought, isn't it?",
+    "imagePrompt": "Start with a dark screen, slowly revealing a person sitting in front of a computer screen, their face illuminated by the light of the screen. The person appears nervous, looking over their shoulder.",
+    "effect": "pan_left",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-1.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/f83673f7-f968-42b4-9cb7-87d06c73ea3e.jpg"
+  },
+  "2": {
+    "script": "Well, this might be a reality for some users of Meta AI.",
+    "imagePrompt": "Transition to a vibrant, futuristic image of the Meta AI logo, surrounded by swirling patterns of data and light.",
+    "effect": "zoom_in",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-2.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/9bc4f544-4bad-44dd-b21e-ad882f6c9703.jpg"
+  },
+  "3": {
+    "script": "Apparently, some Meta AI users are unknowingly making their searches public.",
+    "imagePrompt": "A surprised and concerned emoji floating in a sea of code and digital information, symbolizing user's unawareness.",
+    "effect": "pan_up",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-3.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/72e7aa16-3ea2-4e8a-a0b4-b45c2a157191.jpg"
+  },
+  "4": {
+    "script": "And this isn't some random rumor, it's a fact!",
+    "imagePrompt": "A newspaper headline pops up confirming the news, making it clear that this isn't just a rumor.",
+    "effect": "pan_right",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-4.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/f04273bc-8ba0-4cf5-94ee-a6b091650c0d.jpg"
+  },
+  "5": {
+    "script": "But why should you care? Here's why...",
+    "imagePrompt": "A question mark in the middle of the screen, surrounded by thought bubbles filled with various personal information icons.",
+    "effect": "zoom_out",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-5.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/833bc026-7107-4517-87fe-4cbe0e680acd.jpg"
+  },
+  "6": {
+    "script": "Your search history can reveal a lot about you. Your likes, dislikes, interests, and even your secrets.",
+    "imagePrompt": "Various symbols representing personal interests appear around a silhouette of a head, representing the person's thoughts and interests.",
+    "effect": "none",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-6.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/ece1b9a1-d48f-46e6-bac0-67ec4785461d.jpg"
+  },
+  "7": {
+    "script": "Imagine if all that information was public, available for anyone to see.",
+    "imagePrompt": "The silhouette's face changes to a shocked expression as the surrounding symbols start to escape and float away.",
+    "effect": "pan_down",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-7.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/3442603b-9f44-47a8-9970-ce1f7b688067.jpg"
+  },
+  "8": {
+    "script": "So, what can you do to protect your privacy?",
+    "imagePrompt": "The screen splits into two halves. One side is dark with a lock symbol, representing privacy, and the other is bright with an open book symbol, representing public information.",
+    "effect": "pan_left",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-8.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/533aaf9e-b923-4671-bce1-35d031e71eb0.jpg"
+  },
+  "9": {
+    "script": "Stay vigilant, be aware of the privacy settings on your apps, and above all, stay informed!",
+    "imagePrompt": "A silhouette is shown adjusting the settings on a giant smartphone, symbolizing the control users have over their own privacy.",
+    "effect": "zoom_in",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-9.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/a8654a98-fa80-47ef-ad3e-29ff2927b2c0.jpg"
+  },
+  "10": {
+    "script": "And the best way to stay informed? Subscribe to our channel for daily news updates. Because knowledge is power, folks!",
+    "imagePrompt": "The screen transitions to a 'subscribe' button, with an arrow pointing towards it. The background is dynamic and engaging, encouraging the viewer to take action.",
+    "effect": "pan_right",
+    "duration": 3,
+    "audioPath": "data/a47bf841-39e2-4556-b414-32c6ce0682d1/audio-10.mp3",
+    "imageUrl": "https://im.runware.ai/image/ws/2/ii/a72fae50-8796-465d-b27b-80bf6db93ecc.jpg"
+  },
+  "metadata": {
+    "title": "Meta AI searches made public - but do all its users realise? - BBC",
+    "description": "Meta AI users may be inadvertently making their searches public without realising it."
+  }
+}
