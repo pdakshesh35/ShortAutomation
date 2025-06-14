@@ -26,17 +26,23 @@ class ImageToVideoDirector:
         dur = instruction.duration
         # basic constant movement speed
         speed = 50
+        # scale factor to avoid black edges during pans
+        pan_scale = 1.2
         if effect == "zoom_in":
             return clip.resize(lambda t: 1 + 0.1 * t / dur)
         elif effect == "zoom_out":
             return clip.resize(lambda t: 1 + 0.1 * (1 - t / dur))
         elif effect == "pan_left":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: (-speed * t, "center"))
         elif effect == "pan_right":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: (speed * t, "center"))
         elif effect == "pan_up":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: ("center", -speed * t))
         elif effect == "pan_down":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: ("center", speed * t))
         return clip
 

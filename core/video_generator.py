@@ -19,17 +19,23 @@ class VideoGenerator:
     def _apply_effect(self, clip: ImageClip, effect: str, duration: float) -> ImageClip:
         """Apply a simple pan or zoom effect to the clip."""
         speed = 50
+        # Slightly enlarge the clip during pans to hide edges
+        pan_scale = 1.2
         if effect == "zoom_in":
             return clip.resize(lambda t: 1 + 0.1 * t / duration)
         if effect == "zoom_out":
             return clip.resize(lambda t: 1 + 0.1 * (1 - t / duration))
         if effect == "pan_left":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: (-speed * t, "center"))
         if effect == "pan_right":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: (speed * t, "center"))
         if effect == "pan_up":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: ("center", -speed * t))
         if effect == "pan_down":
+            clip = clip.resize(pan_scale)
             return clip.set_position(lambda t: ("center", speed * t))
         return clip
 
