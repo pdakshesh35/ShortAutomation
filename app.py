@@ -118,15 +118,23 @@ async def generate_news_script(request_id: str):
     news_content = latest_article.get("content", "")
     
     # Construct prompt for GPT-4 to generate a 10-scene script
-    prompt = f'''Write a 2-minute script in 10 scenes for vertical platforms like YouTube Shorts, Instagram Reels, and TikTok. The target viewers are 15–50-year-olds who may not have much background on the topic. Use a casual, relatable tone instead of a typical news narrator. Spend time giving context so they understand why the story matters and how it connects to everyday life. The first scene should hook viewers and the last should invite them to subscribe for daily updates. Allocate a duration for each scene so the total is close to 120 seconds. Make sure the amount of dialogue in each scene roughly matches its duration at a natural speaking pace.
+    prompt = f'''Create a short-form news script using the article below.
 
-Instruction for Image Prompts : "Imagine a visually dynamic scene filled with vibrant colors and fluid shapes that evoke emotion and energy without any textual elements or statistics. The image should display an abstract interplay of light, shadows, and organic forms that suggest movement and narrative depth, using visual cues like radiant gradients, swirling patterns, and symbolic silhouettes to tell a story purely through imagery, completely free of any words or lettering."
+Guidelines:
+1. Platforms: YouTube Shorts, Instagram Reels, and TikTok.
+2. Audience: youth 15–50 with little background knowledge. Use a casual,
+   relatable tone—avoid the typical news narrator style.
+3. Context: dedicate time in each scene to explain why the story matters and
+   how it connects to everyday life.
+4. Duration: include a numeric "duration" for each scene so the total is around
+   two minutes. Write enough dialogue to fill that time.
+5. Image Prompt: describe vibrant, abstract visuals without text or statistics.
+6. Director cues: assign one camera effect per scene (zoom_in, zoom_out,
+   pan_left, pan_right, pan_up, pan_down, or none) under an "effect" key.
 
-Additionally provide simple director instructions for each scene. Use one of these camera effects: zoom_in, zoom_out, pan_left, pan_right, pan_up, pan_down or none. Include them under an "effect" key and a numeric "duration" representing the approximate seconds of narration for that scene. These instructions will be used by a script that turns images into video with basic pan and zoom.
+News Content: {news_content}
 
-News Content : {news_content}
-Output Format:
-Return the final result in the following JSON structure:
+Output JSON:
 {{
   "1": {{ "script": "Your Scene 1 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 1 here", "effect": "pan_left", "duration": 15 }},
   "2": {{ "script": "Your Scene 2 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 2 here", "effect": "zoom_in", "duration": 10 }},
