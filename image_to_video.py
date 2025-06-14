@@ -26,18 +26,29 @@ class ImageToVideoDirector:
         dur = instruction.duration
         # basic constant movement speed
         speed = 50
+
+        def scaled(clip, dim, dur):
+            dist = speed * dur
+            scale = 1 + 2 * dist / dim
+            c = clip.resize(scale)
+            offset = (c.w - self.width) / 2 if dim == clip.w else (c.h - self.height) / 2
+            return c, offset
         if effect == "zoom_in":
             return clip.resize(lambda t: 1 + 0.1 * t / dur)
         elif effect == "zoom_out":
             return clip.resize(lambda t: 1 + 0.1 * (1 - t / dur))
         elif effect == "pan_left":
-            return clip.set_position(lambda t: (-speed * t, "center"))
+            clip, off = scaled(clip, clip.w, dur)
+            return clip.set_position(lambda t: (-speed * t - off, "center"))
         elif effect == "pan_right":
-            return clip.set_position(lambda t: (speed * t, "center"))
+            clip, off = scaled(clip, clip.w, dur)
+            return clip.set_position(lambda t: (speed * t - off, "center"))
         elif effect == "pan_up":
-            return clip.set_position(lambda t: ("center", -speed * t))
+            clip, off = scaled(clip, clip.h, dur)
+            return clip.set_position(lambda t: ("center", -speed * t - off))
         elif effect == "pan_down":
-            return clip.set_position(lambda t: ("center", speed * t))
+            clip, off = scaled(clip, clip.h, dur)
+            return clip.set_position(lambda t: ("center", speed * t - off))
         return clip
 
     def create_video(self, instructions: List[SceneInstruction], output_file: str) -> None:

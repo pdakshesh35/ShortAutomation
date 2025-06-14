@@ -1,3 +1,7 @@
 # .gitignore
 .env
-data
+data/*
+!data/a47bf841-39e2-4556-b414-32c6ce0682d1/
+!data/a47bf841-39e2-4556-b414-32c6ce0682d1/**
+__pycache__/
+core/__pycache__/

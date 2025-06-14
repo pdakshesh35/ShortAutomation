@@ -19,18 +19,30 @@ class VideoGenerator:
     def _apply_effect(self, clip: ImageClip, effect: str, duration: float) -> ImageClip:
         """Apply a simple pan or zoom effect to the clip."""
         speed = 50
+        # Dynamically enlarge the clip during pans so edges stay off screen
+        def scaled(clip, dim, dur):
+            # amount we pan in pixels
+            dist = speed * dur
+            scale = 1 + 2 * dist / dim
+            c = clip.resize(scale)
+            offset = (c.w - self.VIDEO_WIDTH) / 2 if dim == clip.w else (c.h - self.VIDEO_HEIGHT) / 2
+            return c, offset
         if effect == "zoom_in":
             return clip.resize(lambda t: 1 + 0.1 * t / duration)
         if effect == "zoom_out":
             return clip.resize(lambda t: 1 + 0.1 * (1 - t / duration))
         if effect == "pan_left":
-            return clip.set_position(lambda t: (-speed * t, "center"))
+            clip, off = scaled(clip, clip.w, duration)
+            return clip.set_position(lambda t: (-speed * t - off, "center"))
         if effect == "pan_right":
-            return clip.set_position(lambda t: (speed * t, "center"))
+            clip, off = scaled(clip, clip.w, duration)
+            return clip.set_position(lambda t: (speed * t - off, "center"))
         if effect == "pan_up":
-            return clip.set_position(lambda t: ("center", -speed * t))
+            clip, off = scaled(clip, clip.h, duration)
+            return clip.set_position(lambda t: ("center", -speed * t - off))
         if effect == "pan_down":
-            return clip.set_position(lambda t: ("center", speed * t))
+            clip, off = scaled(clip, clip.h, duration)
+            return clip.set_position(lambda t: ("center", speed * t - off))
         return clip
 
     def _load_font(self):
