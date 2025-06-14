@@ -127,10 +127,12 @@ Guidelines:
 3. Context: dedicate time in each scene to explain why the story matters and
    how it connects to everyday life.
 4. Duration: include a numeric "duration" for each scene so the total is around
-   two minutes. Write enough dialogue to fill that time.
+   two minutes.
 5. Image Prompt: describe vibrant, abstract visuals without text or statistics.
 6. Director cues: assign one camera effect per scene (zoom_in, zoom_out,
    pan_left, pan_right, pan_up, pan_down, or none) under an "effect" key.
+7. Write enough words in each scene's script to match its duration at about
+   three spoken words per second.
 
 News Content: {news_content}
 
