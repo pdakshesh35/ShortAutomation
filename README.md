@@ -4,7 +4,7 @@ This project is a FastAPI-based application that automates the creation of engag
 
 ## Features
 - **News Fetching**: Retrieves top headlines from NewsAPI based on country, category, or query.
-- **Script Generation**: Uses OpenAI GPT-4 with a structured, bullet-style prompt to craft a 2-minute script split into 10 scenes for YouTube Shorts, Instagram Reels, and TikTok. The dialogue targets viewers aged 15–50 and explains why the news matters in a casual way. Each scene includes a duration value and enough narration to match that time at a natural speaking pace, plus simple director instructions (e.g., pan or zoom effects).
+- **Script Generation**: Uses OpenAI GPT-4 with a structured, bullet-style prompt to craft a 2-minute script split into 10 scenes for YouTube Shorts, Instagram Reels, and TikTok. The dialogue targets viewers aged 15–50, drops in today's trending slang to feel viral, and explains why the news matters in a casual way. Each scene includes a duration value and enough narration to match that time at a natural speaking pace, plus simple director instructions (e.g., pan or zoom effects).
 - **Audio Generation**: Converts scripts to audio using OpenAI's TTS (text-to-speech) with the "nova" voice.
 - **Image Generation**: Creates vibrant, abstract images without text or statistics using Runware's image inference API.
 - **Video Stitching**: Combines audio, images, and dynamic subtitles into a vertical video (1080x1920 or 1152x2048) using `moviepy` and `Pillow`.

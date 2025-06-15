@@ -133,6 +133,8 @@ Guidelines:
    pan_left, pan_right, pan_up, pan_down, or none) under an "effect" key.
 7. Write enough words in each scene's script to match its duration at about
    three spoken words per second.
+8. Sprinkle in today's trending slang and catchy phrases so the video feels
+   viral and relatable.
 
 News Content: {news_content}
 
