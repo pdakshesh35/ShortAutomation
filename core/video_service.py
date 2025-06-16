@@ -15,7 +15,7 @@ class VideoService:
     def __init__(self, width: int, height: int):
         self.generator = VideoGenerator(width, height)
 
-    def generate_from_dict(self, data: Dict, output_file: str):
+    def generate_from_dict(self, data: Dict, output_file: str, bg_music_path: str | None = None):
         """
         Generate a video directly from the given scene dictionary.
         The dictionary must have string keys "1", "2", ... for each scene,
@@ -24,9 +24,9 @@ class VideoService:
         if "scenes" not in data:
             count = len([k for k in data.keys() if k.isdigit()])
             data["scenes"] = str(count)
-        self.generator.create_final_video(data, output_file)
+        self.generator.create_final_video(data, output_file, bg_music_path)
 
-    def generate_from_json(self, json_str: str, output_file: str):
+    def generate_from_json(self, json_str: str, output_file: str, bg_music_path: str | None = None):
         """
         Parse the JSON string into a Payload, build the scene dict, and generate the video.
         """
@@ -36,17 +36,17 @@ class VideoService:
             for i, scene in enumerate(payload.get_all_scenes())
         }
         scene_dict["scenes"] = str(len(payload.get_all_scenes()))
-        self.generate_from_dict(scene_dict, output_file)
+        self.generate_from_dict(scene_dict, output_file, bg_music_path)
 
-    def generate_from_file(self, filepath: str, output_file: str):
+    def generate_from_file(self, filepath: str, output_file: str, bg_music_path: str | None = None):
         """
         Load JSON from a file path and generate the video.
         """
         with open(filepath, "r", encoding="utf-8") as f:
             json_str = f.read()
-        self.generate_from_json(json_str, output_file)
+        self.generate_from_json(json_str, output_file, bg_music_path)
 
-    def generate(self, input_json_path: str, output_video_path: str):
+    def generate(self, input_json_path: str, output_video_path: str, bg_music_path: str | None = None):
         """
         Load payload from a JSON file, download images and stitch scenes into a single video,
         then generate an SRT subtitle file with word-sync for social media.
@@ -108,7 +108,7 @@ class VideoService:
 
         # Generate video
         try:
-            self.generate_from_dict(scene_dict, output_video_path)
+            self.generate_from_dict(scene_dict, output_video_path, bg_music_path)
         finally:
             # Clean up temporary directory
             for file in os.listdir(tmp_dir):

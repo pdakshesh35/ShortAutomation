@@ -1,18 +1,16 @@
 import asyncio
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import httpx
 import os
 import uuid
 import json
-import base64
-from newsapi import NewsApiClient
 from dotenv import load_dotenv
-from pathlib import Path
 from openai import OpenAI
 from runware import Runware, IImageInference
 from core.video_service import VideoService
 from fastapi.responses import FileResponse
+from niches import get_handler
+from utils import create_task_response
 
 # Load environment variables from .env file
 load_dotenv()
@@ -23,139 +21,8 @@ app = FastAPI()
 # Initialize global OpenAI client with API key from environment
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Global variables to store the latest news article and AI-generated script response
-latest_article = None
-latest_ai_response = None
 
-def create_task_response(requestId: str, task: str, status: str, message: str = "") -> str:
-    """
-    Generate a standardized JSON response for task status updates.
-    
-    Args:
-        requestId (str): Unique identifier for the request.
-        task (str): Task identifier (e.g., "1", "2", "Completed").
-        status (str): Status of the task ("Success" or "Error").
-        message (str): Optional message with details or error information.
-    
-    Returns:
-        str: JSON string of the response.
-    """
-    response = {"RequestId": requestId, "Task": task, "Status": status, "Message": message}
-    return json.dumps(response)
-
-async def fetch_news_article(country: str, category: str, query: str, request_id: str):
-    """
-    Fetch a news article from NewsAPI based on country, category, and optional query.
-    
-    Args:
-        country (str): Country code for news (e.g., "us").
-        category (str): News category (e.g., "business").
-        query (str): Optional search term for news.
-        request_id (str): Unique identifier for the request.
-    
-    Yields:
-        str: JSON response indicating success or error.
-    """
-    # Retrieve NewsAPI key from environment
-    api_key = os.getenv("NEWS_API_KEY")
-    if not api_key:
-        yield create_task_response(request_id, "1", "Error", "NEWS_API_KEY not set in environment.")
-        return
-    
-    # Initialize NewsAPI client
-    newsapi = NewsApiClient(api_key=api_key)
-    
-    # Build query parameters
-    kwargs = {
-        "country": country,
-        "category": category,
-        "page_size": 5
-    }
-    if query:
-        kwargs["q"] = query
-    
-    try:
-        # Fetch top headlines in a separate thread to avoid blocking
-        news_json = await asyncio.to_thread(newsapi.get_top_headlines, **kwargs)
-    except Exception as e:
-        news_json = {"error": str(e)}
-    
-    # Find the first article with required fields (title, description, content)
-    valid_article = None
-    if "articles" in news_json and isinstance(news_json["articles"], list):
-        for article in news_json["articles"]:
-            if article.get("title") and article.get("description") and article.get("content"):
-                valid_article = article
-                break
-    
-    if valid_article:
-        global latest_article
-        latest_article = valid_article
-        msg = (f"Fetched news: Title: {valid_article['title']}, "
-               f"Description: {valid_article['description']}, Content: {valid_article['content']}")
-        yield create_task_response(request_id, "1", "Success", msg)
-    else:
-        yield create_task_response(request_id, "1", "Error", "No valid news article found with all required fields.")
-
-async def generate_news_script(request_id: str):
-    global latest_article, latest_ai_response
-    if latest_article is None:
-        yield create_task_response(request_id, "2", "Error", "No news article data available.")
-        return
-    
-    # Extract news article details
-    news_title = latest_article.get("title", "No Title")
-    news_description = latest_article.get("description", "No Description")
-    news_content = latest_article.get("content", "")
-    
-    # Construct prompt for GPT-4 to generate a multi-scene script
-    prompt = f'''
-            Act as a viral content strategist and news scriptwriter for vertical video platforms like YouTube Shorts, Instagram Reels, TikTok, and Snapchat.
-            Your task is to break down the following news story into a short-form, highly engaging 2-minute narration targeted at college students and young professionals (ages 18–30).
-            Tone: Witty, informative, and lightly meme-style — like a confident, sarcastic best friend who knows her facts and isn’t afraid to drop a punchline.
-            Voice: Female with strong personality. Include rhetorical hooks, Gen Z-friendly humor, and clever metaphors. Feel free to reference pop culture, TikTok trends, or modern slang in a tasteful way.
-            News Style: Cover all types — breaking news, trending topics, weird facts, tech, social issues, etc.
-            Output the response as JSON in this exact structure:
-                {{
-                "1": {{ "script": "Scene 1 script here", "imagePrompt": "Scene 1 image description", "effect": "pan_left", "duration": 15 }},
-                "2": {{ "script": "Scene 2 script here", "imagePrompt": "Scene 2 image description", "effect": "zoom_in", "duration": 12 }},
-                ...,
-                "metadata": {{ "title": "Insert catchy video title based on the news", "description": "Insert a short YouTube-style description summarizing the story in 1–2 lines with hashtags if relevant" 
-                }}
-                }}
-            Each scene should:
-                •	Be 10–15 seconds long
-                •	Push the story forward in a fun, engaging way
-                •	Use visual metaphors or animated whiteboard/doodle-style scenes
-                •	Include motion effects like zoom_in, pan_right, fade_in, wobble, etc.
-
-            End the final scene with a strong call to action, like:
-            “If you liked this, hit follow — you deserve better news.”
-            Begin with this news story:
-            {news_content}
-    '''
-    
-    try:
-        # Call OpenAI API in a separate thread for non-blocking execution
-        response = await asyncio.to_thread(
-            lambda: openai_client.chat.completions.create(
-                model="gpt-4.1-mini",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7
-            )
-        )
-        ai_output = response.choices[0].message.content
-        try:
-            # Validate the AI response by parsing it as JSON
-            json.loads(ai_output)
-            latest_ai_response = ai_output
-            yield create_task_response(request_id, "2", "Success")
-        except Exception as parse_error:
-            yield create_task_response(request_id, "2", "Error", f"JSON parsing error: {str(parse_error)}")
-    except Exception as e:
-        yield create_task_response(request_id, "2", "Error", str(e))
-
-async def serialize_script_response(request_id: str):
+async def serialize_script_response(handler, request_id: str):
     """
     Serialize and validate the AI-generated script response, adding scene IDs and request ID.
     
@@ -165,14 +32,13 @@ async def serialize_script_response(request_id: str):
     Yields:
         str: JSON response indicating success, error, or serialized data.
     """
-    global latest_ai_response
-    if latest_ai_response is None:
+    if handler.ai_response is None:
         yield create_task_response(request_id, "2a", "Error", "No AI response available to serialize.")
         return
-    
+
     try:
         # Parse AI response JSON
-        ai_data = json.loads(latest_ai_response)
+        ai_data = json.loads(handler.ai_response)
         ai_data["request_id"] = request_id
         
         # Add unique scene IDs to each scene
@@ -213,6 +79,7 @@ async def serialize_script_response(request_id: str):
         
         # Serialize validated JSON and yield
         serialized = json.dumps(ai_data, indent=2)
+        handler.ai_response = serialized
         yield create_task_response(request_id, "2a", "Success", serialized)
     except Exception as e:
         yield create_task_response(request_id, "2a", "Error", str(e))
@@ -250,7 +117,7 @@ async def generate_audio_file(request_id: str, text: str, scene_number: str) -> 
         raise e
     return file_path
 
-async def convert_scripts_to_audio(request_id: str):
+async def convert_scripts_to_audio(handler, request_id: str):
     """
     Convert each scene's script to an audio file using OpenAI TTS.
     
@@ -260,14 +127,13 @@ async def convert_scripts_to_audio(request_id: str):
     Yields:
         str: JSON response for each scene's audio generation status.
     """
-    global latest_ai_response
-    if latest_ai_response is None:
+    if handler.ai_response is None:
         yield create_task_response(request_id, "3", "Error", "No AI response available for audio generation.")
         return
-    
+
     try:
         # Parse AI response JSON
-        ai_data = json.loads(latest_ai_response)
+        ai_data = json.loads(handler.ai_response)
     except Exception as e:
         yield create_task_response(request_id, "3", "Error", f"Error parsing AI response: {str(e)}")
         return
@@ -289,12 +155,12 @@ async def convert_scripts_to_audio(request_id: str):
             messages.append(create_task_response(request_id, "3", "Error", f"Scene {key} missing script data."))
     
     # Update global AI response with audio paths
-    latest_ai_response = json.dumps(ai_data)
+    handler.ai_response = json.dumps(ai_data)
     
     for m in messages:
         yield m
 
-async def generate_scene_images(request_id: str):
+async def generate_scene_images(handler, request_id: str):
     """
     Generate images for each scene using Runware's image inference API.
     
@@ -304,14 +170,13 @@ async def generate_scene_images(request_id: str):
     Yields:
         str: JSON response for each scene's image generation status.
     """
-    global latest_ai_response
-    if latest_ai_response is None:
+    if handler.ai_response is None:
         yield create_task_response(request_id, "4", "Error", "No AI response available for image generation.")
         return
     
     try:
         # Parse AI response JSON
-        ai_data = json.loads(latest_ai_response)
+        ai_data = json.loads(handler.ai_response)
     except Exception as e:
         yield create_task_response(request_id, "4", "Error", f"Error parsing AI response: {str(e)}")
         return
@@ -353,12 +218,12 @@ async def generate_scene_images(request_id: str):
             messages.append(create_task_response(request_id, "4", "Error", f"Scene {key} missing imagePrompt."))
     
     # Update global AI response with image URLs
-    latest_ai_response = json.dumps(ai_data)
+    handler.ai_response = json.dumps(ai_data)
     
     for m in messages:
         yield m
 
-async def stitch_video_from_scenes(request_id: str):
+async def stitch_video_from_scenes(handler, request_id: str):
     """
     Stitch scenes into a final video using VideoService, combining audio, images, and subtitles.
     
@@ -374,13 +239,13 @@ async def stitch_video_from_scenes(request_id: str):
     # Save AI response as JSON payload
     filename = f"data/{request_id}/payload.json"
     with open(filename, 'w') as file:
-        json.dump(json.loads(latest_ai_response), file, indent=2)
+        json.dump(json.loads(handler.ai_response), file, indent=2)
     
     # Generate video
-    await asyncio.to_thread(service.generate, filename, f"data/{request_id}/final_video.mp4")
+    await asyncio.to_thread(service.generate, filename, f"data/{request_id}/final_video.mp4", handler.background_music_path())
     yield create_task_response(request_id, "5", "Success", f"Video generated: data/{request_id}/final_video.mp4")
 
-async def pipeline_tasks(country: str, category: str, query: str):
+async def pipeline_tasks(niche: str, country: str, category: str, query: str):
     """
     Orchestrate the video generation pipeline, executing tasks sequentially.
     
@@ -392,27 +257,26 @@ async def pipeline_tasks(country: str, category: str, query: str):
     Yields:
         str: JSON response for each task's status.
     """
-    # Generate unique request ID
+    handler = get_handler(niche, openai_client)
     request_id = str(uuid.uuid4())
     yield create_task_response(request_id, "0", "Success", f"Request ID: {request_id}")
-    
-    # Execute pipeline tasks
-    async for message in fetch_news_article(country, category, query, request_id):
+
+    async for message in handler.fetch_content(request_id=request_id, country=country, category=category, query=query):
         yield message
-    async for message in generate_news_script(request_id):
+    async for message in handler.generate_script(request_id):
         yield message
-    async for message in serialize_script_response(request_id):
+    async for message in serialize_script_response(handler, request_id):
         yield message
-    async for message in convert_scripts_to_audio(request_id):
+    async for message in convert_scripts_to_audio(handler, request_id):
         yield message
-    async for message in generate_scene_images(request_id):
+    async for message in generate_scene_images(handler, request_id):
         yield message
-    async for message in stitch_video_from_scenes(request_id):
+    async for message in stitch_video_from_scenes(handler, request_id):
         yield message
     yield create_task_response(request_id, "Completed", "Success", f"Request ID: {request_id}")
 
 @app.get("/stream")
-async def stream_endpoint(country: str = "us", category: str = "business", query: str = ""):
+async def stream_endpoint(niche: str = "news", country: str = "us", category: str = "business", query: str = ""):
     """
     Stream the video generation pipeline as Server-Sent Events (SSE).
     
@@ -426,7 +290,7 @@ async def stream_endpoint(country: str = "us", category: str = "business", query
     """
     async def event_generator():
         # Yield task status messages as SSE events
-        async for message in pipeline_tasks(country, category, query):
+        async for message in pipeline_tasks(niche, country, category, query):
             yield f"data: {message}\n\n"
             # Terminate stream after "Completed" message
             if '"Task":"Completed"' in message:

@@ -184,7 +184,7 @@ class VideoGenerator:
                .set_duration(duration).set_audio(audio)
         return clip
 
-    def create_final_video(self, data: dict, output_file: str):
+    def create_final_video(self, data: dict, output_file: str, bg_music_path: str | None = None):
         clips = []
         total = int(data.get("scenes", len([k for k in data if k.isdigit()])))
         for i in range(1, total + 1):
@@ -194,7 +194,7 @@ class VideoGenerator:
         final = concatenate_videoclips(clips, method="compose")
 
         # Add background music without overpowering narration
-        bg_path = os.path.join("data", "news-bg-music.mp3")
+        bg_path = bg_music_path or os.path.join("data", "news-bg-music.mp3")
         if os.path.exists(bg_path):
             try:
                 bg_music = AudioFileClip(bg_path)
