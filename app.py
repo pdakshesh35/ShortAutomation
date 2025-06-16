@@ -108,7 +108,7 @@ async def generate_news_script(request_id: str):
     news_description = latest_article.get("description", "No Description")
     news_content = latest_article.get("content", "")
     
-    # Construct prompt for GPT-4 to generate a 10-scene script
+    # Construct prompt for GPT-4 to generate a multi-scene script
     prompt = f'''
             Act as a viral content strategist and news scriptwriter for vertical video platforms like YouTube Shorts, Instagram Reels, TikTok, and Snapchat.
             Your task is to break down the following news story into a short-form, highly engaging 2-minute narration targeted at college students and young professionals (ages 18–30).
@@ -190,20 +190,21 @@ async def serialize_script_response(request_id: str):
             if "description" not in ai_data["metadata"]:
                 error_messages.append("Missing 'description' in metadata.")
         
-        for scene_number in map(str, range(1, 11)):
-            if scene_number not in ai_data:
-                error_messages.append(f"Missing scene {scene_number}.")
-            else:
-                scene = ai_data[scene_number]
-                if not isinstance(scene, dict):
-                    error_messages.append(f"Scene {scene_number} is not a dictionary.")
-                else:
-                    if "script" not in scene:
-                        error_messages.append(f"Missing 'script' in scene {scene_number}.")
-                    if "imagePrompt" not in scene:
-                        error_messages.append(f"Missing 'imagePrompt' in scene {scene_number}.")
-                    if "scene_id" not in scene:
-                        error_messages.append(f"Missing 'scene_id' in scene {scene_number}.")
+        scene_numbers = sorted(int(k) for k in ai_data.keys() if k.isdigit())
+        if not scene_numbers:
+            error_messages.append("No scenes found in AI response.")
+        for num in scene_numbers:
+            key = str(num)
+            scene = ai_data.get(key)
+            if not isinstance(scene, dict):
+                error_messages.append(f"Scene {key} is not a dictionary.")
+                continue
+            if "script" not in scene:
+                error_messages.append(f"Missing 'script' in scene {key}.")
+            if "imagePrompt" not in scene:
+                error_messages.append(f"Missing 'imagePrompt' in scene {key}.")
+            if "scene_id" not in scene:
+                error_messages.append(f"Missing 'scene_id' in scene {key}.")
         
         if error_messages:
             yield create_task_response(request_id, "2a", "Error", "; ".join(error_messages))
@@ -272,19 +273,20 @@ async def convert_scripts_to_audio(request_id: str):
         return
     
     messages = []
-    for scene_number in map(str, range(1, 11)):
-        scene = ai_data.get(scene_number)
+    scene_numbers = sorted(int(k) for k in ai_data.keys() if k.isdigit())
+    for num in scene_numbers:
+        key = str(num)
+        scene = ai_data.get(key)
         if scene and "script" in scene:
             script_text = scene["script"]
             try:
-                # Generate audio file for the scene
-                file_path = await generate_audio_file(request_id, script_text, scene_number)
-                ai_data[scene_number]["audioPath"] = file_path
-                messages.append(create_task_response(request_id, "3", "Success", f"Audio file generated for scene {scene_number}: {file_path}"))
+                file_path = await generate_audio_file(request_id, script_text, key)
+                ai_data[key]["audioPath"] = file_path
+                messages.append(create_task_response(request_id, "3", "Success", f"Audio file generated for scene {key}: {file_path}"))
             except Exception as gen_err:
-                messages.append(create_task_response(request_id, "3", "Error", f"Error generating audio for scene {scene_number}: {str(gen_err)}"))
+                messages.append(create_task_response(request_id, "3", "Error", f"Error generating audio for scene {key}: {str(gen_err)}"))
         else:
-            messages.append(create_task_response(request_id, "3", "Error", f"Scene {scene_number} missing script data."))
+            messages.append(create_task_response(request_id, "3", "Error", f"Scene {key} missing script data."))
     
     # Update global AI response with audio paths
     latest_ai_response = json.dumps(ai_data)
@@ -323,12 +325,13 @@ async def generate_scene_images(request_id: str):
         return
 
     messages = []
-    for scene_number in map(str, range(1, 11)):
-        scene = ai_data.get(scene_number)
+    scene_numbers = sorted(int(k) for k in ai_data.keys() if k.isdigit())
+    for num in scene_numbers:
+        key = str(num)
+        scene = ai_data.get(key)
         if scene and "imagePrompt" in scene:
             image_prompt = scene["imagePrompt"]
             try:
-                # Create image inference request
                 request_image = IImageInference(
                     positivePrompt=image_prompt,
                     taskUUID=str(uuid.uuid4()),
@@ -340,14 +343,14 @@ async def generate_scene_images(request_id: str):
                 images = await runware_client.imageInference(requestImage=request_image)
                 if images and len(images) > 0:
                     image_url = images[0].imageURL
-                    ai_data[scene_number]["imageUrl"] = image_url
-                    messages.append(create_task_response(request_id, "4", "Success", f"Image generated for scene {scene_number}: {image_url}"))
+                    ai_data[key]["imageUrl"] = image_url
+                    messages.append(create_task_response(request_id, "4", "Success", f"Image generated for scene {key}: {image_url}"))
                 else:
-                    messages.append(create_task_response(request_id, "4", "Error", f"No image generated for scene {scene_number}."))
+                    messages.append(create_task_response(request_id, "4", "Error", f"No image generated for scene {key}."))
             except Exception as e:
-                messages.append(create_task_response(request_id, "4", "Error", f"Error generating image for scene {scene_number}: {str(e)}"))
+                messages.append(create_task_response(request_id, "4", "Error", f"Error generating image for scene {key}: {str(e)}"))
         else:
-            messages.append(create_task_response(request_id, "4", "Error", f"Scene {scene_number} missing imagePrompt."))
+            messages.append(create_task_response(request_id, "4", "Error", f"Scene {key} missing imagePrompt."))
     
     # Update global AI response with image URLs
     latest_ai_response = json.dumps(ai_data)
