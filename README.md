@@ -1,10 +1,10 @@
 # YouTube Shorts News Video Generator
 
-This project is a FastAPI-based application that automates the creation of engaging YouTube Shorts-style news videos. It fetches news articles, generates a 2-minute script with 10 scenes, converts scripts to audio, creates dynamic images, and stitches them into a video with synchronized subtitles. The application is designed to narrate news in a cool, engaging way targeted at younger audiences, explaining the impact and relevance of the news. It uses external APIs (NewsAPI, OpenAI, Runware) and runs in a Dockerized environment for portability.
+This project is a FastAPI-based application that automates the creation of engaging YouTube Shorts-style news videos. It fetches news articles, generates a 2-minute script split into multiple scenes, converts scripts to audio, creates dynamic images, and stitches them into a video with synchronized subtitles. The application is designed to narrate news in a cool, engaging way targeted at younger audiences, explaining the impact and relevance of the news. It uses external APIs (NewsAPI, OpenAI, Runware) and runs in a Dockerized environment for portability.
 
 ## Features
 - **News Fetching**: Retrieves top headlines from NewsAPI based on country, category, or query.
-- **Script Generation**: Uses OpenAI GPT-4 with a structured, bullet-style prompt to craft a 2-minute script split into 10 scenes for YouTube Shorts, Instagram Reels, and TikTok. The dialogue targets viewers aged 15–50, drops in today's trending slang to feel viral, and explains why the news matters in a casual way. Each scene includes a duration value and enough narration to match that time at a natural speaking pace, plus simple director instructions (e.g., pan or zoom effects).
+- **Script Generation**: Uses OpenAI GPT-4 with a structured, bullet-style prompt to craft a 2-minute script split into multiple scenes for YouTube Shorts, Instagram Reels, and TikTok. The dialogue targets viewers aged 15–50, drops in today's trending slang to feel viral, and explains why the news matters in a casual way. Each scene includes a duration value and enough narration to match that time at a natural speaking pace, plus simple director instructions (e.g., pan or zoom effects).
 - **Audio Generation**: Converts scripts to audio using OpenAI's TTS (text-to-speech) with the "nova" voice.
 - **Image Generation**: Creates vibrant, abstract images without text or statistics using Runware's image inference API.
 - **Video Stitching**: Combines audio, images, and dynamic subtitles into a vertical video (1080x1920 or 1152x2048) using `moviepy` and `Pillow`.
@@ -115,7 +115,7 @@ This project is a FastAPI-based application that automates the creation of engag
 ### Pipeline Tasks
 The `/stream` endpoint executes the following tasks:
 1. **Task 1**: Fetch news from NewsAPI.
-2. **Task 2**: Generate a 10-scene script using OpenAI GPT-4.
+2. **Task 2**: Generate a multi-scene script using OpenAI GPT-4.
 3. **Task 2a**: Serialize and validate the script JSON.
 4. **Task 3**: Convert scripts to audio using OpenAI TTS.
 5. **Task 4**: Generate images for each scene using Runware.
@@ -125,7 +125,7 @@ The `/stream` endpoint executes the following tasks:
 The `payload.json` file (generated in `task5_stitch_video`) has the following structure:
 ```json
 {
-  "scenes": "10",
+  "scenes": "<number of scenes>",
   "1": {
     "scene_id": "<uuid>",
     "script": "Welcome to our daily news blast!",
@@ -135,12 +135,12 @@ The `payload.json` file (generated in `task5_stitch_video`) has the following st
     "effect": "zoom_in"
   },
   ...
-  "10": {
+  "<last_scene_number>": {
     "scene_id": "<uuid>",
     "script": "Subscribe for daily news updates!",
     "imagePrompt": "Dynamic scene with a subscribe button silhouette...",
-    "audioPath": "data/<request_id>/audio-10.mp3",
-    "imageUrl": "https://example.com/image10.jpg",
+    "audioPath": "data/<request_id>/audio-<last_scene_number>.mp3",
+    "imageUrl": "https://example.com/image<last_scene_number>.jpg",
     "effect": "pan_right"
   },
   "metadata": {
