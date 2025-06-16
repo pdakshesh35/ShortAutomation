@@ -98,15 +98,6 @@ async def fetch_news_article(country: str, category: str, query: str, request_id
         yield create_task_response(request_id, "1", "Error", "No valid news article found with all required fields.")
 
 async def generate_news_script(request_id: str):
-    """
-    Generate a 2-minute YouTube Shorts script from the latest news article using OpenAI GPT-4.
-    
-    Args:
-        request_id (str): Unique identifier for the request.
-    
-    Yields:
-        str: JSON response indicating success or error.
-    """
     global latest_article, latest_ai_response
     if latest_article is None:
         yield create_task_response(request_id, "2", "Error", "No news article data available.")
@@ -118,46 +109,37 @@ async def generate_news_script(request_id: str):
     news_content = latest_article.get("content", "")
     
     # Construct prompt for GPT-4 to generate a 10-scene script
-    prompt = f'''Create a short-form news script using the article below.
+    prompt = f'''
+            Act as a viral content strategist and news scriptwriter for vertical video platforms like YouTube Shorts, Instagram Reels, TikTok, and Snapchat.
+            Your task is to break down the following news story into a short-form, highly engaging 2-minute narration targeted at college students and young professionals (ages 18–30).
+            Tone: Witty, informative, and lightly meme-style — like a confident, sarcastic best friend who knows her facts and isn’t afraid to drop a punchline.
+            Voice: Female with strong personality. Include rhetorical hooks, Gen Z-friendly humor, and clever metaphors. Feel free to reference pop culture, TikTok trends, or modern slang in a tasteful way.
+            News Style: Cover all types — breaking news, trending topics, weird facts, tech, social issues, etc.
+            Output the response as JSON in this exact structure:
+                {{
+                "1": {{ "script": "Scene 1 script here", "imagePrompt": "Scene 1 image description", "effect": "pan_left", "duration": 15 }},
+                "2": {{ "script": "Scene 2 script here", "imagePrompt": "Scene 2 image description", "effect": "zoom_in", "duration": 12 }},
+                ...,
+                "metadata": {{ "title": "Insert catchy video title based on the news", "description": "Insert a short YouTube-style description summarizing the story in 1–2 lines with hashtags if relevant" 
+                }}
+                }}
+            Each scene should:
+                •	Be 10–15 seconds long
+                •	Push the story forward in a fun, engaging way
+                •	Use visual metaphors or animated whiteboard/doodle-style scenes
+                •	Include motion effects like zoom_in, pan_right, fade_in, wobble, etc.
 
-Guidelines:
-1. Platforms: YouTube Shorts, Instagram Reels, and TikTok.
-2. Audience: youth 15–50 with little background knowledge. Use a casual,
-   relatable tone—avoid the typical news narrator style.
-3. Context: dedicate time in each scene to explain why the story matters and
-   how it connects to everyday life.
-4. Duration: include a numeric "duration" for each scene so the total is around
-   two minutes.
-5. Image Prompt: describe vibrant, abstract visuals without text or statistics.
-6. Director cues: assign one camera effect per scene (zoom_in, zoom_out,
-   pan_left, pan_right, pan_up, pan_down, or none) under an "effect" key.
-7. Write enough words in each scene's script to match its duration at about
-   three spoken words per second.
-8. Sprinkle in today's trending slang and catchy phrases so the video feels
-   viral and relatable.
-
-News Content: {news_content}
-
-Output JSON:
-{{
-  "1": {{ "script": "Your Scene 1 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 1 here", "effect": "pan_left", "duration": 15 }},
-  "2": {{ "script": "Your Scene 2 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 2 here", "effect": "zoom_in", "duration": 10 }},
-  "3": {{ "script": "Your Scene 3 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 3 here", "effect": "pan_up", "duration": 12 }},
-  "4": {{ "script": "Your Scene 4 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 4 here", "effect": "pan_right", "duration": 11 }},
-  "5": {{ "script": "Your Scene 5 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 5 here", "effect": "zoom_out", "duration": 13 }},
-  "6": {{ "script": "Your Scene 6 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 6 here", "effect": "none", "duration": 12 }},
-  "7": {{ "script": "Your Scene 7 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 7 here", "effect": "pan_down", "duration": 13 }},
-  "8": {{ "script": "Your Scene 8 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 8 here", "effect": "pan_left", "duration": 12 }},
-  "9": {{ "script": "Your Scene 9 script here", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 9 here", "effect": "zoom_in", "duration": 11 }},
-  "10": {{ "script": "Your Scene 10 script here, including a strong call-to-action to subscribe for more content", "imagePrompt": "Your detailed Videoscribe image prompt for Scene 10 here", "effect": "pan_right", "duration": 11 }},
-  "metadata": {{ "title": "{news_title}", "description": "{news_description}" }}
-}}'''
+            End the final scene with a strong call to action, like:
+            “If you liked this, hit follow — you deserve better news.”
+            Begin with this news story:
+            {news_content}
+    '''
     
     try:
         # Call OpenAI API in a separate thread for non-blocking execution
         response = await asyncio.to_thread(
             lambda: openai_client.chat.completions.create(
-                model="gpt-4",
+                model="gpt-4.1-mini",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7
             )
