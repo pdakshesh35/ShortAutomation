@@ -1,7 +1,14 @@
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from moviepy.video.VideoClip import VideoClip
-from moviepy.editor import AudioFileClip, ImageClip, CompositeVideoClip, concatenate_videoclips
+from moviepy.editor import (
+    AudioFileClip,
+    ImageClip,
+    CompositeVideoClip,
+    CompositeAudioClip,
+    concatenate_videoclips,
+)
+from moviepy.audio.fx import all as afx
 from typing import Any
 import os
 import tempfile
@@ -185,4 +192,23 @@ class VideoGenerator:
             if key in data:
                 clips.append(self.generate_scene_clip(data[key]))
         final = concatenate_videoclips(clips, method="compose")
-        final.write_videofile(output_file, codec="libx264", audio_codec="aac", fps=24, audio=True)
+
+        # Add background music without overpowering narration
+        bg_path = os.path.join("data", "news-bg-music.mp3")
+        if os.path.exists(bg_path):
+            try:
+                bg_music = AudioFileClip(bg_path)
+                bg_music = afx.audio_loop(bg_music, duration=final.duration)
+                bg_music = bg_music.volumex(0.2)
+                final_audio = CompositeAudioClip([final.audio, bg_music])
+                final = final.set_audio(final_audio)
+            except Exception as e:
+                print(f"Failed to add background music: {e}")
+
+        final.write_videofile(
+            output_file,
+            codec="libx264",
+            audio_codec="aac",
+            fps=24,
+            audio=True,
+        )
