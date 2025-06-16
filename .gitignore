@@ -6,3 +6,4 @@ data/*
 !data/news-bg-music.mp3
 __pycache__/
 core/__pycache__/
+tests/*.mp4
