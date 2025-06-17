@@ -1,5 +1,6 @@
 import asyncio
 import os
+from typing import AsyncGenerator
 from newsapi import NewsApiClient
 from utils import create_task_response
 from .base import NicheBase, PROMPT_STRUCTURE_INSTRUCTIONS
@@ -8,7 +9,9 @@ from .base import NicheBase, PROMPT_STRUCTURE_INSTRUCTIONS
 class NewsNiche(NicheBase):
     """Niche handler for news videos."""
 
-    async def fetch_content(self, request_id: str, country: str, category: str, query: str) -> asyncio.AsyncGenerator[str, None]:
+    async def fetch_content(
+        self, request_id: str, country: str, category: str, query: str
+    ) -> AsyncGenerator[str, None]:
         api_key = os.getenv("NEWS_API_KEY")
         if not api_key:
             yield create_task_response(request_id, "1", "Error", "NEWS_API_KEY not set in environment.")
