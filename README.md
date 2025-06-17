@@ -24,6 +24,10 @@ This project is a FastAPI-based application that automates the creation of engag
 - **`Dockerfile`**: Defines the Docker image setup using Miniconda, installing dependencies and running the FastAPI app.
 - **`run.sh`**: Script to build and run the Docker container, mapping port 28080 and mounting a data volume.
 
+## Architecture Diagram
+
+The high-level flow of the application is illustrated in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## Prerequisites
 - **Docker**: Required to build and run the application in a containerized environment.
 - **API Keys**:
