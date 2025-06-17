@@ -16,7 +16,14 @@ ENV PATH /opt/conda/envs/short_automation/bin:$PATH
 # Copy the application code into the container
 COPY . .
 
-# Expose port 8000 for the application
+# Install fonts for subtitles
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        fonts-dejavu \
+        fonts-liberation && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Expose port 28080 for the application
 EXPOSE 28080
 
 # Run the application with uvicorn; use "app:app" (module:application object)

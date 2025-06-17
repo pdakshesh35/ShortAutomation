@@ -1,9 +1,6 @@
 import asyncio
 import os
-import json
-import uuid
 from newsapi import NewsApiClient
-from runware import Runware, IImageInference
 from utils import create_task_response
 from .base import NicheBase, PROMPT_STRUCTURE_INSTRUCTIONS
 
