@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.10
-  - fastapi
+  - fastapi>=0.110
   - uvicorn
   - httpx
   - ffmpeg
@@ -19,3 +19,4 @@ dependencies:
       - Pillow==9.5.0
       - requests
       - imageio-ffmpeg
+      - "mcp[cli]"

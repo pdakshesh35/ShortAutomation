@@ -117,6 +117,17 @@ The high-level flow of the application is illustrated in [docs/ARCHITECTURE.md](
      ImageToVideoDirector(1920, 1080).create_video(scenes, "output.mp4")
      ```
 
+### MCP Server
+The repository includes an experimental [Model Context Protocol](https://modelcontextprotocol.io) server.
+Each pipeline step is exposed as an MCP resource, prompt, or tool so that clients like Claude Desktop can interact with the pipeline.
+Start the server with:
+
+```bash
+mcp run mcp_server.py
+```
+
+You can then install it in Claude Desktop via `mcp install mcp_server.py` and call the tools directly.
+
 ### Pipeline Tasks
 The `/stream` endpoint executes the following tasks:
 1. **Task 1**: Fetch news from NewsAPI.
