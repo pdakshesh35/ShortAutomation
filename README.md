@@ -86,12 +86,13 @@ The high-level flow of the application is illustrated in [docs/ARCHITECTURE.md](
 1. **`/stream` (GET)**:
    - Streams the video generation pipeline as Server-Sent Events (SSE).
    - Query parameters:
+     - `niche` (default: "news"): Pipeline variant to execute.
      - `country` (default: "us"): Country code for news (e.g., "us", "gb").
      - `category` (default: "business"): News category (e.g., "business", "technology").
      - `query` (optional): Search term for news (e.g., "AI").
    - Example:
      ```bash
-     curl http://localhost:28080/stream?country=us&category=technology&query=AI
+     curl "http://localhost:28080/stream?niche=news&country=us&category=technology&query=AI"
      ```
    - Response: SSE stream with JSON messages for each task (0 to 5, plus "Completed").
    - Output: Video saved to `data/<request_id>/final_video.mp4`.
@@ -124,6 +125,32 @@ The `/stream` endpoint executes the following tasks:
 4. **Task 3**: Convert scripts to audio using OpenAI TTS.
 5. **Task 4**: Generate images for each scene using Runware.
 6. **Task 5**: Stitch audio, images, and subtitles into a video using `VideoService`.
+
+### Detailed `/stream` Flow
+The `/stream` endpoint emits one Server-Sent Event (SSE) for each task. Every
+event payload follows this JSON structure:
+
+```json
+{
+  "RequestId": "<uuid>",
+  "Task": "<step>",
+  "Status": "Success|Error",
+  "Message": "<human readable detail or serialized JSON>"
+}
+```
+
+SSE messages are sent as `data: <json>\n\n`. After the final `Completed` task
+a closing `data: {}` event signals that the client can close the stream.
+
+| Task | Purpose | Input | Output |
+| --- | --- | --- | --- |
+| **0** | Initialize request | query parameters (`niche`, `country`, `category`, `query`) | Newly generated `request_id` |
+| **1** | Fetch a news article | `country`, `category`, `query` | Article content stored in memory and a status message summarizing the fetch |
+| **2** | Generate multi-scene script | Article content | Raw JSON script returned by OpenAI |
+| **2a** | Serialize & validate script | JSON from Task 2 | Validated JSON with scene IDs, yielded back to the client |
+| **3** | Convert script to audio | Script lines from validated JSON | MP3 files under `data/<request_id>` and a message per scene with the audio path |
+| **4** | Generate scene images | Image prompts from validated JSON | Image URLs from Runware with one message per scene |
+| **5** | Stitch final video | Audio paths and image URLs | `data/<request_id>/final_video.mp4` and final completion message |
 
 ### Sample JSON Payload
 The `payload.json` file (generated in `task5_stitch_video`) has the following structure:
