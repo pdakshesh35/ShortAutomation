@@ -14,9 +14,12 @@ mcp = FastMCP("Short Automation")
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-@mcp.resource("news://article")
+@mcp.resource(
+    "news://article",
+    description="Fetch a news article from NewsAPI based on country, category, and optional search query",
+)
 async def fetch_news(country: str = "us", category: str = "business", query: str = "") -> dict:
-    """Fetch a single news article."""
+    """Return a single news article as a JSON object."""
     api_key = os.getenv("NEWS_API_KEY")
     if not api_key:
         raise RuntimeError("NEWS_API_KEY not set")
@@ -31,9 +34,12 @@ async def fetch_news(country: str = "us", category: str = "business", query: str
     raise RuntimeError("No valid article found")
 
 
-@mcp.prompt("script-prompt")
+@mcp.prompt(
+    "script-prompt",
+    description="Prompt template that converts a raw news article into a multi-scene JSON script",
+)
 def news_script_prompt(article: str) -> str:
-    """Return the prompt used to generate the script."""
+    """Build the structured prompt for script generation."""
     return (
         f"""
             Act as a viral content strategist and news scriptwriter for vertical video platforms like YouTube Shorts, Instagram Reels, TikTok, and Snapchat.
@@ -51,9 +57,11 @@ def news_script_prompt(article: str) -> str:
     )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Call OpenAI to generate a multi-scene JSON script using the provided prompt",
+)
 async def generate_script(prompt: str) -> str:
-    """Generate a multi-scene script using OpenAI."""
+    """Generate a multi-scene script using OpenAI ChatGPT."""
     response = await asyncio.to_thread(
         lambda: openai_client.chat.completions.create(
             model="gpt-4.1-mini",
@@ -64,7 +72,9 @@ async def generate_script(prompt: str) -> str:
     return response.choices[0].message.content
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Validate and enrich the JSON script with unique scene IDs and a request ID",
+)
 def serialize_script(script: str) -> str:
     """Validate the script JSON and assign scene IDs."""
     ai_data = json.loads(script)
@@ -76,7 +86,9 @@ def serialize_script(script: str) -> str:
     return json.dumps(ai_data, indent=2)
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Convert each scene of the JSON script into MP3 audio using OpenAI TTS",
+)
 async def scripts_to_audio(script: str) -> str:
     """Convert each scene's script to audio using OpenAI TTS."""
     ai_data = json.loads(script)
@@ -96,7 +108,9 @@ async def scripts_to_audio(script: str) -> str:
     return json.dumps(ai_data, indent=2)
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Generate an image for each scene using Runware's image inference API",
+)
 async def generate_images(script: str) -> str:
     """Generate scene images using Runware."""
     ai_data = json.loads(script)
@@ -122,7 +136,9 @@ async def generate_images(script: str) -> str:
     return json.dumps(ai_data, indent=2)
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Combine images and audio for all scenes and render the final vertical video",
+)
 def stitch_video(script: str) -> str:
     """Stitch audio and images into a final video."""
     ai_data = json.loads(script)
@@ -136,6 +152,19 @@ def stitch_video(script: str) -> str:
     output_path = f"data/{request_id}/final_video.mp4"
     service.generate(payload_file, output_path)
     return output_path
+
+
+@mcp.tool(
+    description="Complete pipeline: given a raw news article string, generate the video file path",
+)
+async def article_to_video(article: str) -> str:
+    """Generate a video directly from a news article."""
+    prompt = news_script_prompt(article)
+    script = await generate_script(prompt)
+    serialized = serialize_script(script)
+    audio_json = await scripts_to_audio(serialized)
+    images_json = await generate_images(audio_json)
+    return stitch_video(images_json)
 
 
 if __name__ == "__main__":
