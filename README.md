@@ -94,7 +94,20 @@ The high-level flow of the application is illustrated in [docs/ARCHITECTURE.md](
    - Response: SSE stream with JSON messages for each task (0 to 5, plus "Completed").
    - Output: Video saved to `data/<request_id>/final_video.mp4`.
 
-2. **`/test-video` (GET)**:
+2. **`/stream-script` (POST)**:
+   - Streams the artifact generation steps using a pre-generated script JSON.
+   - Body: JSON payload with the same structure as the script output.
+   - Query parameters:
+     - `niche` (default: "news"): Pipeline variant to execute.
+   - Example:
+     ```bash
+     curl -X POST -H "Content-Type: application/json" \
+          -d @script.json http://localhost:28080/stream-script
+     ```
+   - Response: SSE stream with JSON messages for tasks 2a to 5.
+   - Output: Video saved to `data/<request_id>/final_video.mp4`.
+
+3. **`/test-video` (GET)**:
    - Generates a video from a sample JSON payload (`data/f851c750-b4a6-45fa-b23d-5c268e738e95/payload.json`).
    - Returns the video as a downloadable MP4 file.
    - Example:

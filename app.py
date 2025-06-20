@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.responses import StreamingResponse
 import os
 import uuid
@@ -275,6 +275,25 @@ async def pipeline_tasks(niche: str, country: str, category: str, query: str):
         yield message
     yield create_task_response(request_id, "Completed", "Success", f"Request ID: {request_id}")
 
+async def pipeline_from_result(niche: str, result_json: str):
+    """Run tasks using a pre-generated script JSON."""
+    handler = get_handler(niche, openai_client)
+    request_id = str(uuid.uuid4())
+    yield create_task_response(request_id, "0", "Success", f"Request ID: {request_id}")
+
+    # Use provided script JSON directly
+    handler.ai_response = result_json
+
+    async for message in serialize_script_response(handler, request_id):
+        yield message
+    async for message in convert_scripts_to_audio(handler, request_id):
+        yield message
+    async for message in generate_scene_images(handler, request_id):
+        yield message
+    async for message in stitch_video_from_scenes(handler, request_id):
+        yield message
+    yield create_task_response(request_id, "Completed", "Success", f"Request ID: {request_id}")
+
 @app.get("/stream")
 async def stream_endpoint(niche: str = "news", country: str = "us", category: str = "business", query: str = ""):
     """
@@ -306,6 +325,33 @@ async def stream_endpoint(niche: str = "news", country: str = "us", category: st
             "Cache-Control": "no-cache",
             "Connection": "keep-alive"
         }
+    )
+
+@app.post("/stream-script")
+async def stream_script_endpoint(
+    prompt_result: dict = Body(...),
+    niche: str = "news",
+):
+    """Stream pipeline using a pre-generated script JSON."""
+
+    result_json = json.dumps(prompt_result)
+
+    async def event_generator():
+        async for message in pipeline_from_result(niche, result_json):
+            yield f"data: {message}\n\n"
+            if '"Task":"Completed"' in message:
+                yield "data: {}\n\n"
+                break
+        return
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Content-Disposition": "inline",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
     )
 
 @app.get("/test-video")
