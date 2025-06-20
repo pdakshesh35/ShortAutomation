@@ -10,16 +10,13 @@ This project is a FastAPI-based application that automates the creation of engag
 - **Video Stitching**: Combines audio, images, and dynamic subtitles into a vertical video (1080x1920 or 1152x2048) using `moviepy` and `Pillow`.
 - **Dynamic Subtitles**: Adds word-highlighted subtitles in the third quarter of the screen, styled with Montserrat font for social media appeal.
 - **Streaming API**: Provides a Server-Sent Events (SSE) endpoint (`/stream`) to track pipeline progress in real-time.
-- **Image-to-Video Director**: Combines a list of images into a video using simple pan and zoom effects based on director-style instructions.
 - **Test Endpoint**: Generates a video from a sample JSON payload for testing (`/test-video`).
 
 ## Project Structure
 - **`app.py`**: Main FastAPI application defining the `/stream` and `/test-video` endpoints, orchestrating the pipeline (news fetching, script generation, audio, images, video stitching).
 - **`video_service.py`**: Service layer for video generation, handling JSON payload parsing, image downloading, and video creation via `VideoGenerator`.
 - **`video_generator.py`**: Core video generation logic, creating scenes with images, audio, and dynamic subtitles using `moviepy` and `Pillow`.
-- **`video_subtitle_generator.py`**: Alternative subtitle generator using speech recognition for word-level sync (not used in the main pipeline).
 - **`payload_parser.py`**: Parses JSON payloads into `Scene` and `Payload` objects for structured data handling.
-- **`image_to_video.py`**: Utility to create a video from a sequence of images with optional pan/zoom effects.
 - **`environment.yml`**: Conda environment configuration with dependencies (Python 3.10, FastAPI, OpenAI, etc.).
 - **`Dockerfile`**: Defines the Docker image setup using Miniconda, installing dependencies and running the FastAPI app.
 - **`run.sh`**: Script to build and run the Docker container, mapping port 28080 and mounting a data volume.
@@ -105,17 +102,6 @@ The high-level flow of the application is illustrated in [docs/ARCHITECTURE.md](
      curl -o test_video.mp4 http://localhost:28080/test-video
      ```
    - Output: Video saved to `data/test_video.mp4` and returned in the response.
-3. **Image-to-Video**:
-   - Create a video from local images using `ImageToVideoDirector`.
-   - Example:
-     ```python
-     from image_to_video import ImageToVideoDirector, SceneInstruction
-     scenes = [
-         SceneInstruction("img1.jpg", 2.0, "zoom_in"),
-         SceneInstruction("img2.jpg", 2.0, "pan_left")
-     ]
-     ImageToVideoDirector(1920, 1080).create_video(scenes, "output.mp4")
-     ```
 
 ### Pipeline Tasks
 The `/stream` endpoint executes the following tasks:
@@ -214,13 +200,11 @@ Defined in `environment.yml`:
 - **Video Generation Errors**: Check logs in `data/<request_id>` for issues with `VideoService` or `VideoGenerator`. Ensure `ffmpeg` is installed in the container.
 
 ## Limitations
-- **VideoSubtitleGenerator**: Not integrated into the main pipeline; uses speech recognition, which requires internet access and may be less reliable than `VideoGenerator`’s script-based subtitles.
 - **Font Dependency**: Relies on Montserrat or system fonts; fallback to PIL’s default font may result in smaller text.
 - **API Quotas**: NewsAPI, OpenAI, and Runware have rate limits; monitor usage to avoid throttling.
 - **Docker Volume**: Ensure the `./data` directory is writable on the host.
 
 ## Future Improvements
-- Integrate `VideoSubtitleGenerator` for more accurate word-level subtitle sync.
 - Add support for multiple video resolutions or aspect ratios.
 - Implement caching for API responses to reduce costs and latency.
 - Enhance error handling with retries for API failures.
