@@ -116,6 +116,33 @@ The high-level flow of the application is illustrated in [docs/ARCHITECTURE.md](
      ```
    - Output: Video saved to `data/test_video.mp4` and returned in the response.
 
+### MCP Server
+The repository includes an experimental [Model Context Protocol](https://modelcontextprotocol.io) server.
+Each pipeline step is exposed as an MCP resource, prompt, or tool so that clients like Claude Desktop can interact with the pipeline.
+Start the server with:
+
+```bash
+mcp run mcp_server.py
+```
+
+You can then install it in Claude Desktop via `mcp install mcp_server.py` and call the tools directly.
+
+#### MCP Components
+
+| Type | Name | Description |
+| ---- | ---- | ----------- |
+| Resource | `news://article` | Fetch a single news article from NewsAPI based on country, category, and optional query |
+| Prompt | `script-prompt` | Template that turns a raw news article into a multi-scene JSON script |
+| Tool | `generate_script` | Call OpenAI to create the JSON script from the prompt |
+| Tool | `serialize_script` | Validate the script and attach scene and request IDs |
+| Tool | `scripts_to_audio` | Convert each scene's script to an MP3 file using OpenAI TTS |
+| Tool | `generate_images` | Generate scene images using Runware |
+| Tool | `stitch_video` | Combine images and audio into the final vertical MP4 video |
+| Tool | `article_to_video` | Run the entire pipeline starting from a provided article text |
+
+Call the `article_to_video` tool when you already have a news article and simply
+want an MP4 video generated from it.
+
 ### Pipeline Tasks
 The `/stream` endpoint executes the following tasks:
 1. **Task 1**: Fetch news from NewsAPI.
